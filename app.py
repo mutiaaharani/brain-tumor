@@ -1,7 +1,4 @@
-from gradcam import (
-    make_gradcam_heatmap,
-    overlay_gradcam
-)
+
 import streamlit as st
 import tensorflow as tf
 import numpy as np
@@ -73,36 +70,3 @@ if uploaded_file:
     st.info(
         f"Confidence: {confidence:.2f}%"
     )
-gradcam_input = image.resize(
-    (224,224)
-)
-
-gradcam_input = np.array(
-    gradcam_input
-).astype(np.float32)
-
-gradcam_input = gradcam_input / 255.0
-
-gradcam_input = np.expand_dims(
-    gradcam_input,
-    axis=0
-)
-
-heatmap = make_gradcam_heatmap(
-    gradcam_input
-)
-
-overlay = overlay_gradcam(
-    np.array(image),
-    heatmap
-)
-
-st.subheader(
-    "Grad-CAM Visualization"
-)
-
-st.image(
-    overlay,
-    caption="Area yang menjadi fokus model",
-    use_container_width=True
-)
