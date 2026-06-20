@@ -6,7 +6,7 @@ from PIL import Image
 
 # Load TFLite
 interpreter = tf.lite.Interpreter(
-    model_path="brain_tumor_model_optimized.tflite"
+    model_path="brain_tumor_model.tflite"
 )
 
 interpreter.allocate_tensors()
