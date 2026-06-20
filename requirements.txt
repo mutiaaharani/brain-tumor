@@ -1,4 +1,6 @@
 streamlit
-tflite-runtime
+tensorflow
 numpy
 pillow
+opencv-python-headless
+matplotlib
