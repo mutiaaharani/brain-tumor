@@ -1,10 +1,9 @@
-
 import streamlit as st
 import tensorflow as tf
 import numpy as np
 from PIL import Image
 
-# Load TFLite
+# Load TFLite Model
 interpreter = tf.lite.Interpreter(
     model_path="brain_tumor_model.tflite"
 )
@@ -14,6 +13,7 @@ interpreter.allocate_tensors()
 input_details = interpreter.get_input_details()
 output_details = interpreter.get_output_details()
 
+# Class Names
 CLASS_NAMES = [
     "Glioma",
     "Meningioma",
@@ -21,26 +21,32 @@ CLASS_NAMES = [
     "Pituitary"
 ]
 
+# Title
 st.title("🧠 Brain Tumor Classification")
 
 uploaded_file = st.file_uploader(
-    "Upload MRI",
-    type=["jpg","jpeg","png"]
+    "Upload MRI Image",
+    type=["jpg", "jpeg", "png"]
 )
 
 if uploaded_file:
 
+    # Display Image
     image = Image.open(uploaded_file).convert("RGB")
 
-    st.image(image)
+    st.image(
+        image,
+        caption="Uploaded MRI",
+        use_container_width=True
+    )
 
-    img = image.resize((224,224))
+    # Preprocessing
+    img = image.resize((224, 224))
 
     img = np.array(img)
 
     img = img.astype(np.float32)
 
-    # Sesuaikan dengan preprocessing training
     img = img / 255.0
 
     img = np.expand_dims(
@@ -48,29 +54,34 @@ if uploaded_file:
         axis=0
     )
 
+    # Set Input
+    interpreter.set_tensor(
+        input_details[0]["index"],
+        img
+    )
+
+    # Run Inference
     interpreter.invoke()
 
-output = interpreter.get_tensor(
-    output_details[0]['index']
-)
+    # Get Output
+    output = interpreter.get_tensor(
+        output_details[0]["index"]
+    )
 
-st.write("Raw Output:")
-st.write(output)
+    # Debug
+    st.subheader("Debug Output")
 
-st.write("Argmax:")
-st.write(np.argmax(output))
+    st.write("Raw Output:")
+    st.write(output)
 
-pred = np.argmax(output)
+    st.write("Argmax:")
+    st.write(np.argmax(output))
 
-confidence = np.max(output)*100
+    # Prediction
+    pred = np.argmax(output)
 
-st.success(
-    f"Prediction: {CLASS_NAMES[pred]}"
-)
+    confidence = np.max(output) * 100
 
-st.info(
-    f"Confidence: {confidence:.2f}%"
-)
     st.success(
         f"Prediction: {CLASS_NAMES[pred]}"
     )
@@ -78,9 +89,11 @@ st.info(
     st.info(
         f"Confidence: {confidence:.2f}%"
     )
-st.subheader("Probabilities")
 
-for i, cls in enumerate(CLASS_NAMES):
-    st.write(
-        f"{cls}: {float(output[0][i])*100:.2f}%"
-    )
+    # Probability
+    st.subheader("Probabilities")
+
+    for i, cls in enumerate(CLASS_NAMES):
+        st.write(
+            f"{cls}: {float(output[0][i]) * 100:.2f}%"
+        )
