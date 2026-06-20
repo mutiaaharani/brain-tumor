@@ -1,0 +1,72 @@
+
+import streamlit as st
+import tensorflow as tf
+import numpy as np
+from PIL import Image
+
+# Load TFLite
+interpreter = tf.lite.Interpreter(
+    model_path="brain_tumor_model_optimized.tflite"
+)
+
+interpreter.allocate_tensors()
+
+input_details = interpreter.get_input_details()
+output_details = interpreter.get_output_details()
+
+CLASS_NAMES = [
+    "Glioma",
+    "Meningioma",
+    "No Tumor",
+    "Pituitary"
+]
+
+st.title("🧠 Brain Tumor Classification")
+
+uploaded_file = st.file_uploader(
+    "Upload MRI",
+    type=["jpg","jpeg","png"]
+)
+
+if uploaded_file:
+
+    image = Image.open(uploaded_file).convert("RGB")
+
+    st.image(image)
+
+    img = image.resize((224,224))
+
+    img = np.array(img)
+
+    img = img.astype(np.float32)
+
+    # Sesuaikan dengan preprocessing training
+    img = img / 255.0
+
+    img = np.expand_dims(
+        img,
+        axis=0
+    )
+
+    interpreter.set_tensor(
+        input_details[0]['index'],
+        img
+    )
+
+    interpreter.invoke()
+
+    output = interpreter.get_tensor(
+        output_details[0]['index']
+    )
+
+    pred = np.argmax(output)
+
+    confidence = np.max(output)*100
+
+    st.success(
+        f"Prediction: {CLASS_NAMES[pred]}"
+    )
+
+    st.info(
+        f"Confidence: {confidence:.2f}%"
+    )
