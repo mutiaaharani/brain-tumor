@@ -64,6 +64,13 @@ pred = np.argmax(output)
 
 confidence = np.max(output)*100
 
+st.success(
+    f"Prediction: {CLASS_NAMES[pred]}"
+)
+
+st.info(
+    f"Confidence: {confidence:.2f}%"
+)
     st.success(
         f"Prediction: {CLASS_NAMES[pred]}"
     )
