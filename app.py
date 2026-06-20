@@ -48,20 +48,21 @@ if uploaded_file:
         axis=0
     )
 
-    interpreter.set_tensor(
-        input_details[0]['index'],
-        img
-    )
-
     interpreter.invoke()
 
-    output = interpreter.get_tensor(
-        output_details[0]['index']
-    )
+output = interpreter.get_tensor(
+    output_details[0]['index']
+)
 
-    pred = np.argmax(output)
+st.write("Raw Output:")
+st.write(output)
 
-    confidence = np.max(output)*100
+st.write("Argmax:")
+st.write(np.argmax(output))
+
+pred = np.argmax(output)
+
+confidence = np.max(output)*100
 
     st.success(
         f"Prediction: {CLASS_NAMES[pred]}"
@@ -69,4 +70,10 @@ if uploaded_file:
 
     st.info(
         f"Confidence: {confidence:.2f}%"
+    )
+st.subheader("Probabilities")
+
+for i, cls in enumerate(CLASS_NAMES):
+    st.write(
+        f"{cls}: {float(output[0][i])*100:.2f}%"
     )
